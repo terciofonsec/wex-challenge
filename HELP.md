@@ -189,3 +189,7 @@ To perform code quality analysis with SonarQube:
 
    * You should see your project listed on the dashboard with its code quality metrics, *code smells*, bugs, and coverage.
 
+
+ BIG NOTE:
+    For challenge propose I did not create any branches to commit and opened PRs, I did it directly to main to facilitate and speed up the development. I hope you forgive me.
+
