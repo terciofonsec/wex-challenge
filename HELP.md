@@ -48,6 +48,10 @@ This project implements a Spring Boot application designed to manage purchase tr
 
 * **Testing:** JUnit 5, Mockito
 
+* **Code Coverage:** JaCoCo
+
+* **Code Quality Analysis:** SonarQube
+
 ## Architecture Overview
 
 The application follows a Clean/Hexagonal Architecture, separating concerns into distinct layers:
@@ -73,15 +77,16 @@ The application follows a Clean/Hexagonal Architecture, separating concerns into
 1. **Clone the repository:**
 
    ```bash
-   git clone <your-repo-url>
-   cd purchase-transaction
+   git clone https://github.com/terciofonsec/wex-challenge.git
+   cd to-your-project-location
+
    ```
 
 2. **Import the project:** Open your IDE and import the project as a Gradle project.
 
 3. **Build the project:** Let your IDE download dependencies and build the project. You might need to refresh Gradle dependencies.
 
-4. **Run the application:** Locate the `PurchaseTransactionApplication.java` file (usually in `src/main/java/com/example/purchasetransaction`) and run its `main` method.
+4. **Run the application:** Locate the `PurchaseTransactionApplication.java` file (in `com/wex/challenge`) and run its `main` method.
 
 5. The application will start on `http://localhost:8080`.
 
@@ -91,15 +96,13 @@ Ensure you have Docker and Docker Compose installed on your system.
 
 1. **Clone the repository:**
 
-   ```bash
-   git clone <your-repo-url>
-   cd purchase-transaction
-   ```
+    The same above
 
 2. **Build and run the Docker containers:**
 
    ```bash
    docker compose up --build
+
    ```
 
    This command will build the Docker image (if not already built or if changes are detected) and start the application container.
@@ -108,8 +111,9 @@ Ensure you have Docker and Docker Compose installed on your system.
 
 4. To stop and remove the containers:
 
-   ```bash
+   ```
    docker compose down
+
    ```
 
 ## API Documentation (OpenAPI / Swagger UI)
@@ -122,6 +126,7 @@ Once the application is running (either via IDE or Docker), you can access the A
 
    ```
    http://localhost:8080/swagger-ui.html
+
    ```
 
    Here you can see all available API endpoints, their expected inputs, and example responses. You can also try out the API calls directly from this interface.
@@ -130,38 +135,57 @@ Once the application is running (either via IDE or Docker), you can access the A
 
    ```
    http://localhost:8080/v3/api-docs
+
    ```
 
    This URL provides the raw OpenAPI specification in JSON format, which can be used by other tools.
 
-## How to Use Postman Collection
+## Test Coverage (JaCoCo)
 
-The project includes a Postman collection to easily test the API endpoints.
+To generate the code coverage report using JaCoCo:
 
-1. **Open Postman.**
+1. **Run the JaCoCo report task:**
 
-2. **Import the Collection:**
+   ```
+   ./gradlew jacocoTestReport
 
-   * Click on the `Import` button (usually in the top left or in the sidebar).
+   ```
 
-   * Select the `Raw Text` tab.
+2. **View the report:** Open the `index.html` file located in `build/jacocoHtml/index.html` in your web browser.
 
-   * **Copy the entire content of the `postman-collection` Canvas** (the JSON provided in this conversation).
+You can also run the coverage verification task to ensure a minimum coverage threshold is met:
 
-   * Paste the JSON into the `Raw Text` area.
+```
+./gradlew jacocoTestCoverageVerification
 
-   * Click `Continue`, then `Import`.
+```
 
-3. **Run API Calls:**
+## Code Quality Analysis (SonarQube)
 
-   * In your Postman sidebar, you will now see a collection named "Purchase Transaction API".
+To perform code quality analysis with SonarQube:
 
-   * Expand the collection to see the requests.
+1. **Start the SonarQube Server locally (if not already running):**
+   The easiest way is using Docker:
 
-   * **For "Create New Purchase":** Send the request. Copy the `id` from the response.
+   ```
+   docker run -d --name sonarqube -p 9000:9000 -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true sonarqube:latest
 
-   * **For "Retrieve Converted Purchase":** Paste the copied `id` into the `purchase_id` collection variable (or directly into the URL `http://localhost:8080/purchases/{{purchase_id}}/converted/EUR`). Change `EUR` to other currency codes (e.g., `CAD`, `JPY`) as needed.
+   ```
 
-   * Test the Actuator and Swagger UI endpoints as well.
+   * SonarQube UI: `http://localhost:9000`
 
-Enjoy exploring the application!
+   * Credentials admin/admin.
+
+2. **Run the SonarQube analysis task:**
+
+   ```
+   ./gradlew sonar
+
+   ```
+
+3. **View the analysis results:**
+
+   * After the `sonar` task completes successfully, go to `http://localhost:9000` in your browser.
+
+   * You should see your project listed on the dashboard with its code quality metrics, *code smells*, bugs, and coverage.
+

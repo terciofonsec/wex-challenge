@@ -3,7 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'jacoco'
-	id 'org.sonarqube' version '4.4.1.3373'
+	id 'org.sonarqube' version '6.2.0.5505'
 }
 
 group = 'com.wex.challenge'
@@ -59,10 +59,14 @@ tasks.jacocoTestReport {
 		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
 	}
 
+	classDirectories.setFrom(sourceSets.main.output.classesDirs)
+	sourceDirectories.setFrom(sourceSets.main.java.srcDirs)
+
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
 					'com/wex/challenge/PurchaseTransactionApplication.class',
+					'com/wex/challenge/infrastructure/adapter/external/TreasuryExchangeRateAdapter.class',
 					'**/config/**',
 					'**/dto/**',
 					'**/exception/**',
@@ -84,17 +88,25 @@ tasks.named('jacocoTestCoverageVerification', JacocoCoverageVerification) {
 	}
 	dependsOn tasks.jacocoTestReport
 	group = "verification"
+
+	classDirectories.setFrom(sourceSets.main.output.classesDirs)
+	sourceDirectories.setFrom(sourceSets.main.java.srcDirs)
 }
 
-sonarqube {
+sonar {
 	properties {
-		property "sonar.java.jacoco.reportPaths", "${layout.buildDirectory.file('jacoco/test.exec').asFile}"
-		property "sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.dir('reports/jacoco/test/jacocoTestReport.xml').asFile}"
+		property "sonar.java.jacoco.reportPaths", "${layout.buildDirectory.file('jacoco/test.exec').get().asFile}"
+		property "sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.dir('reports/jacoco/test/jacocoTestReport.xml').get().asFile}"
 		property "sonar.exclusions", "**/*Test.java, **/test/**/*"
 		property "sonar.projectBaseDir", "${projectDir}"
+		property "sonar.gradle.skipCompile", "true"
 	}
 }
 
-tasks.sonarqube {
+tasks.sonar {
 	dependsOn tasks.jacocoTestReport
+}
+
+tasks.named('check') {
+	dependsOn tasks.jacocoTestCoverageVerification
 }
