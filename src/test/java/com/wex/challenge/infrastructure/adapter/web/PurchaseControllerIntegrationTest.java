@@ -7,6 +7,7 @@ import com.wex.challenge.domain.exception.ExchangeRateNotFoundException;
 import com.wex.challenge.domain.model.Purchase;
 import com.wex.challenge.domain.model.PurchaseId;
 import com.wex.challenge.domain.service.CurrencyConversionService;
+import com.wex.challenge.infrastructure.exception.NotSupportedCurrencyException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -156,5 +157,24 @@ public class PurchaseControllerIntegrationTest {
         mockMvc.perform(get("/purchases/{purchaseId}/converted/{targetCurrencyCode}", purchaseId, invalidCurrencyCode)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getConvertedPurchase_shouldReturn400BadRequestWhenCurrencyNotSupported() throws Exception {
+        String purchaseId = "test-purchase-id-unsupported";
+        LocalDate transactionDate = LocalDate.of(2024, 6, 28);
+        BigDecimal originalAmount = new BigDecimal("75.00");
+        String unsupportedCurrencyCode = "SEK";
+
+        Purchase existingPurchase = Purchase.from(purchaseId, "Unsupported Currency Item", transactionDate, originalAmount);
+
+        when(purchaseRepository.findById(PurchaseId.from(purchaseId))).thenReturn(Optional.of(existingPurchase));
+        when(currencyConversionService.getExchangeRate(Currency.getInstance(unsupportedCurrencyCode), transactionDate))
+                .thenThrow(new NotSupportedCurrencyException("No Treasury country name mapping found for ISO code: " + unsupportedCurrencyCode));
+
+        mockMvc.perform(get("/purchases/{purchaseId}/converted/{targetCurrencyCode}", purchaseId, unsupportedCurrencyCode)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("No Treasury country name mapping found for ISO code: SEK"));
     }
 }

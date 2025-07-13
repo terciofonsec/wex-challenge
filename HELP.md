@@ -22,6 +22,50 @@ This project implements a Spring Boot application designed to manage purchase tr
 
   * Converted amount is rounded to two decimal places.
 
+        Supported Currencies and How to Extend Them
+        The application relies on a specific mapping between ISO currency codes (e.g., "BRL", "EUR") and the country names used by the Treasury Reporting Rates of Exchange API (e.g., "Brazil", "Euro Zone"). This mapping is essential for correctly filtering exchange rates from the external API.
+
+        Currently Supported Currencies:
+
+        The following ISO currency codes are explicitly mapped in the TreasuryExchangeRateAdapter.java file:
+
+        USD: United States - Dollar
+
+        EUR: Euro Zone - Euro
+
+        BRL: Brazil - Real
+
+        CAD: Canada - Dollar
+
+        JPY: Japan - Yen
+
+        GBP: United Kingdom - Pound
+
+        AUD: Australia - Dollar
+
+        MXN: Mexico - Peso
+
+        CHF: Switzerland - Franc
+
+        CNY: China - Yuan (Example)
+
+        How to Add Support for New Currencies:
+
+        If you need to convert a purchase to a currency not listed above, you must manually add its mapping to the ISO_CODE_TO_TREASURY_COUNTRY_MAP in the src/main/java/com/example/purchasetransaction/infrastructure/adapter/external/TreasuryExchangeRateAdapter.java file.
+
+        Identify the ISO Code: Determine the standard 3-letter ISO code for the currency (e.g., "SEK" for Swedish Krona).
+
+        Find the Treasury API Country Name: Consult the Treasury Reporting Rates of Exchange API documentation or explore its data directly (e.g., https://fiscaldata.treasury.gov/datasets/treasury-reporting-rates-exchange/treasury-reporting-rates-of-exchange) to find the exact "Country" name associated with that currency in the API's dataset. For example, for Swedish Krona, it might be "Sweden".
+
+        Update the Map: Add an entry to the ISO_CODE_TO_TREASURY_COUNTRY_MAP in TreasuryExchangeRateAdapter.java:
+
+        private static final Map<String, String> ISO_CODE_TO_TREASURY_COUNTRY_MAP = Map.of(
+        // ... existing mappings
+        "SEK", "Sweden" // Example for Swedish Krona
+        );
+
+        Rebuild and Redeploy: After modifying the map, you must rebuild and redeploy the application for the changes to take effect.
+
 ## Technologies Used
 
 * **Language:** Java 17

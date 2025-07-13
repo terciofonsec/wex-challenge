@@ -8,6 +8,7 @@ import com.wex.challenge.application.service.CreatePurchaseUseCase;
 import com.wex.challenge.application.service.RetrieveConvertedPurchaseUseCase;
 import com.wex.challenge.domain.exception.ExchangeRateNotFoundException;
 import com.wex.challenge.domain.exception.InvalidPurchaseException;
+import com.wex.challenge.infrastructure.exception.NotSupportedCurrencyException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,5 +103,21 @@ public class PurchaseController {
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+
+    @ExceptionHandler(NotSupportedCurrencyException.class)
+    public ResponseEntity<ErrorResponse> handleNotSupportedCurrencyException(NotSupportedCurrencyException ex, WebRequest req) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                req.getDescription(false).replace("uri=", ""),
+                null
+
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 
 }
